@@ -12,21 +12,21 @@ public class Tile {
     this.front = front;
   }
 
-  public Tile(){}
+  Tile(){}
 
-  public ImageView getImageView() {
+  ImageView getImageView() {
     return imageView;
   }
 
-  public void setImageView(ImageView imageView) {
+  void setImageView(ImageView imageView) {
     this.imageView = imageView;
   }
 
-  public Image getFront() {
+  Image getFront() {
     return front;
   }
 
-  public void setFront(Image front) {
+  void setFront(Image front) {
     this.front = front;
   }
 

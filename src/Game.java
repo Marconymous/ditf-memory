@@ -1,3 +1,6 @@
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -8,6 +11,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,7 +30,12 @@ public class Game extends Application {
   private Stage stage;
   private int moves = 0;
   private int highscore = Integer.MAX_VALUE;
-  private Scene scene;
+  private boolean animationRunning = false;
+  private Timeline animation = new Timeline(new KeyFrame(Duration.millis(1000), kf -> {
+    for (Tile tile : openTiles) {
+      tile.getImageView().setImage(back);
+    }
+  }));
 
   public Game() {
     try {
@@ -44,6 +53,8 @@ public class Game extends Application {
         e.printStackTrace();
       }
     }
+    animation.setOnFinished(e -> animationRunning = false);
+    animation.setCycleCount(1);
   }
 
   @Override
@@ -59,10 +70,9 @@ public class Game extends Application {
       e.printStackTrace();
     }
 
-
     this.stage = primaryStage;
 
-    scene = new Scene(root, 1190, 790);
+    Scene scene = new Scene(root, 1190, 790);
     primaryStage.setScene(scene);
     primaryStage.setResizable(false);
     primaryStage.setTitle("Memory");
@@ -88,6 +98,7 @@ public class Game extends Application {
         int finalX = x;
         int finalY = y;
         iv.setOnMouseClicked(event -> {
+          if (animationRunning) return;
           System.out.printf("Tile pressed : %d, %d\n", finalY, finalX);
           if (!t.getImageView().getImage().equals(back)) return;
           iv.setImage(t.getFront());
@@ -98,7 +109,8 @@ public class Game extends Application {
 
           if (isSecondCard) {
             if (!isMatchingPair()) {
-              waitForNextMove();
+              animationRunning = true;
+              animation.play();
             }
             moves++;
           }
@@ -129,7 +141,7 @@ public class Game extends Application {
     Label won = new Label("You've Won!");
     won.setFont(Font.font(30));
     won.setTextFill(new Color(1, 1, 1, 1));
-    Label moves = new Label("Moves : " + this.moves + "\t Highscore : " + this.highscore);
+    Label moves = new Label("Moves : " + this.moves + "\t Best score : " + this.highscore);
     moves.setTextFill(new Color(1, 1, 1, 1));
     moves.setFont(Font.font(30));
     Button retry = new Button("Retry");
@@ -150,18 +162,6 @@ public class Game extends Application {
     b.getChildren().addAll(won, moves, retry);
     Scene winScene = new Scene(b, 1190, 790);
     stage.setScene(winScene);
-  }
-
-  private void waitForNextMove() {
-    Label l = new Label();
-    l.setPrefSize(1190, 790);
-    l.setOnMouseClicked(e -> {
-      stack.getChildren().remove(l);
-      for (Tile tile : openTiles) {
-        tile.getImageView().setImage(back);
-      }
-    });
-    stack.getChildren().add(l);
   }
 
   private boolean isMatchingPair() {
